@@ -8,6 +8,7 @@ class ArchivedButton extends HTMLElement {
     super();
     this._shadowRoot = this.attachShadow({ mode: "open" });
     this._style = document.createElement("style");
+    this._isArchived = notesData.map((note) => note.archived);
   }
 
   connectedCallback() {
@@ -36,7 +37,7 @@ class ArchivedButton extends HTMLElement {
 
     this._shadowRoot.appendChild(this._style);
     this._shadowRoot.innerHTML += `
-    <button>Archived</button>
+    <button>${this._isArchived ? "Archive" : "Unarchive"}</button>
     `;
 
     this.addEventListener("click", () => {
@@ -48,11 +49,18 @@ class ArchivedButton extends HTMLElement {
         const noteIndex = notesData.findIndex((note) => note.id === noteId);
 
         if (noteIndex !== -1) {
-          notesData[noteIndex].archived = true;
-
-          const archiveNote = document.querySelector("note-archive");
-          if (archiveNote) {
-            archiveNote.setArchiveNote(notesData[noteIndex]);
+          if (this._isArchived) {
+            notesData[noteIndex].archived = true;
+            const archiveNote = document.querySelector("note-archive");
+            if (archiveNote) {
+              archiveNote.setNoteArchive(notesData[noteIndex]);
+            }
+          } else {
+            notesData[noteIndex].archived = false;
+            const noteList = document.querySelector("note-list");
+            if (noteList) {
+              noteList.setNoteList(notesData[noteIndex]);
+            }
           }
           noteItem.remove();
         }
