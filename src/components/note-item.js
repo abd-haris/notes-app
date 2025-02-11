@@ -70,6 +70,8 @@ class NoteItem extends HTMLElement {
 
     this.setAttribute("id", this._note.id);
 
+    const isArchived = this._note.archived;
+
     this.innerHTML = `
 
     ${this._style.outerHTML}
@@ -79,7 +81,7 @@ class NoteItem extends HTMLElement {
     </div>
     <div class="item__button">
       <archive-button></archive-button>
-      <delete-button></delete-button>
+      <delete-button archived="{isArchived}"></delete-button>
     </div>
     `;
   }
