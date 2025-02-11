@@ -1,72 +1,46 @@
-import notesData from "../data/data.js";
-
-class ArchivedButton extends HTMLElement {
-  _shadowRoot = null;
-  _style = null;
-
+class NoteArchive extends HTMLElement {
   constructor() {
     super();
-    this._shadowRoot = this.attachShadow({ mode: "open" });
-    this._style = document.createElement("style");
-    this._isArchived = notesData.map((note) => note.archived);
+    this.attachShadow({ mode: "open" });
+    this.notes = [];
+
+    this.shadowRoot.innerHTML = `
+        <style>
+          h2 {
+            text-align: center;
+          }
+          #note-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            width: 90vw;
+            margin-top: 1rem;
+          }
+        </style>
+        <h2>Arsip Notes</h2>
+        <div id="note-list"></div>
+      `;
+  }
+
+  setNoteArchive(note) {
+    this.notes.push(note);
+    this.render();
   }
 
   connectedCallback() {
     this.render();
   }
 
-  _updateStyle() {
-    this._style.textContent = `
-    button {
-        background-color: green;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        }
-    `;
-  }
-
-  _emptyContent() {
-    this._shadowRoot.innerHTML = "";
-  }
-
   render() {
-    this._updateStyle();
-    this._emptyContent();
+    const noteList = this.shadowRoot.querySelector("#note-list");
+    noteList.innerHTML = "";
 
-    this._shadowRoot.appendChild(this._style);
-    this._shadowRoot.innerHTML += `
-    <button>${this._isArchived ? "Archive" : "Unarchive"}</button>
-    `;
-
-    this.addEventListener("click", () => {
-      const noteItem = this.parentNode.parentNode;
-
-      if (noteItem) {
-        const noteId = noteItem._note.id;
-
-        const noteIndex = notesData.findIndex((note) => note.id === noteId);
-
-        if (noteIndex !== -1) {
-          if (this._isArchived) {
-            notesData[noteIndex].archived = true;
-            const archiveNote = document.querySelector("note-archive");
-            if (archiveNote) {
-              archiveNote.setNoteArchive(notesData[noteIndex]);
-            }
-          } else {
-            notesData[noteIndex].archived = false;
-            const noteList = document.querySelector("note-list");
-            if (noteList) {
-              noteList.setNoteList(notesData[noteIndex]);
-            }
-          }
-          noteItem.remove();
-        }
-      }
+    this.notes.forEach((note) => {
+      const noteItem = document.createElement("note-item");
+      noteItem.setNote(note);
+      noteList.appendChild(noteItem);
     });
   }
 }
 
-customElements.define("archive-button", ArchivedButton);
+customElements.define("note-archive", NoteArchive);
